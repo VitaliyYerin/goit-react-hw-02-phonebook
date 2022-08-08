@@ -30,16 +30,45 @@ class App extends Component {
     });
   };
 
-  addContact = data => {
-    return this.state.contacts.map(contact => contact.name).includes(data.name)
-      ? alert(`${data.name} is already in contacts`)
-      : this.setState(prevState => ({
-          contacts: [...prevState.contacts, data],
-        }));
+  addContact = ({ name, number }) => {
+    const normalizedName = name.toLowerCase();
+
+    let isAdded = false;
+
+    this.state.contacts.forEach(el => {
+      if (el.name.toLowerCase() === normalizedName) {
+        alert(`${name} is already in contacts`);
+        isAdded = true;
+      }
+    });
+
+    if (isAdded) {
+      return;
+    }
+
+    let contact = {
+      id: nanoid(),
+      name: name,
+      number: number,
+    };
+
+    this.setState(prevState => ({
+      contacts: [...prevState.contacts, contact],
+    }));
+  };
+
+  getFilteredContacts = () => {
+    const { filter, contacts } = this.state;
+    const normilizedFilter = filter.toLowerCase();
+
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normilizedFilter)
+    );
   };
 
   render() {
     const { contacts, filter } = this.state;
+    const filteredContacts = this.getFilteredContacts();
     return (
       <div className={s.container}>
         <h1>Phonebook</h1>
@@ -47,7 +76,7 @@ class App extends Component {
         <h2>Contacts</h2>
         <Filter filter={filter} handleChange={this.handleFilterChange} />
         <Contacts
-          contacts={contacts}
+          contacts={filteredContacts}
           filter={filter}
           deleteContact={this.deleteContact}
         />
